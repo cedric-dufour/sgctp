@@ -1,0 +1,53 @@
+Simple Geolocalization and Course Transmission Protocol (SGCTP)
+===============================================================
+
+Synopsis
+--------
+
+The objective of the Simple Geolocalization and Course Transmission
+Protocol (SGCTP) is to transmit 2- or 3-dimensional position and motion data
+in such a way as to use as little bandwidth as possible, thus making it fit
+to aggregate data from roaming clients with limited network connectivity.
+
+It can be used to:
+ - transmit data via UDP, with lowest possible bandwidth but lesser reliability
+   and security
+ - transmit data via TCP, with guaranteed reliability and security
+ - store data to file
+ - all of it along optional encryption (and inherent password authentication)
+
+
+Resources
+---------
+
+The Simple Geolocalization and Course Transmission Protocol (SGCTP) source
+tree contains the following resources:
+
+* A technical description of the protocol (see the PROTOCOL document)
+
+* A reference C/C++ implementation of the protocol:
+   - libsgctp.so: dynamic library
+   - libsgctp.a:  static library
+
+* Several utilities...
+  ... for devices interfacing:
+   - gps2sgctp: convert GPSD data to SGCTP data
+   - ais2sgctp: convert GPSD (AIS) data to SGCTP data
+   - sbs2sgctp: convert SBS-1 data to SGCTP data
+   - flarm2sgctp: convert FLARM data to SGCTP data
+  ... for network transmission:
+   - sgctp2tdp: send SGCTP data via TCP
+   - tcp2sgctp: receive SGCTP data via TCP (single client)
+   - sgctp2udp: send SGCTP data via UDP
+   - udp2sgctp: receive SGCTP data via UDP
+  ... for data display or storage
+   - sgctp2dsv: decode and display SGCTP data as DSV
+   - sgctp2xml: decode and display SGCTP data as XML
+   - sgctp2gpx: decode and display SGCTP data as GPX
+  ... for data aggregation and polling
+   - sgctphub: aggregates and redistributes the data sent by SGCTP agents
+   - hub2sgctp: connects to an SGCTP hub and receives SGCTP data
+  ... for data filtering
+   - sgctpfilter: filter SGCTP data according to specified rules
+  ... for developers/administrators
+   - sgctperror: explains error codes return by SGCTP utilities/library
