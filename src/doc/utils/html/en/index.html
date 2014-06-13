@@ -1,0 +1,191 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="content-type" CONTENT="text/html; charset=UTF-8" />
+<LINK REL="stylesheet" TYPE="text/css" HREF="../style.css" />
+<TITLE>Simple Geolocalization and Course Transmission Protocol (SGCTP)</TITLE>
+</HEAD>
+
+<BODY>
+
+<H1>Simple Geolocalization and Course Transmission Protocol (SGCTP)</H1>
+<P STYLE="MARGIN-BOTTOM:15px;"><CITE>A simple and low-footprint protocol to transmit geolocalization and course data</CITE></P>
+<DIV CLASS="H1">
+
+<P><B>Author:</B> C&eacute;dric Dufour <A HREF="http://cedric.dufour.name" TARGET="_blank">&lt;http://cedric.dufour.name&gt;</A></P>
+<P><B>Website:</B> <A HREF="http://cedric.dufour.name/software/sgctp">http://cedric.dufour.name/software/sgctp</A></P>
+
+
+<H2>Synopsis</H2>
+<DIV CLASS="H2">
+<P>The objective of the <DFN>Simple Geolocalization and Course Transmission Protocol (SGCTP)</DFN> is to transmit 2- or 3-dimensional position and motion data in such a way as to use as little bandwidth as possible, thus making it fit to aggregate data from roaming clients with limited network connectivity.</P>
+<P>It can be used to:</P>
+<UL>
+<LI>transmit data via UDP, with lowest possible bandwidth but lesser reliability and security</LI>
+<LI>transmit data via TCP, with guaranteed reliability and security</LI>
+<LI>store data to file</LI>
+<LI>all of it along optional encryption (and inherent password authentication)</LI>
+</UL>
+</DIV><!-- DIV CLASS="H2" -->
+
+<H2>Resources</H2>
+<DIV CLASS="H2">
+<P>The <DFN>Simple Geolocalization and Course Transmission Protocol (SGCTP)</DFN> source tree contains the following resources:</P>
+<UL>
+<LI>A technical description of the protocol (see the PROTOCOL document)</LI>
+<LI>A reference C/C++ implementation of the protocol:</LI>
+<BLOCKQUOTE>
+<UL>
+<LI><B>libsgctp.so</B>: dynamic library</LI>
+<LI><B>libsgctp.a</B>:  static library</LI>
+</UL>
+</BLOCKQUOTE>
+<LI>Several utilities...</LI>
+<BLOCKQUOTE>
+<P>... for devices interfacing:</P>
+<UL>
+<LI><B>gps2sgctp</B>: convert GPSD data to SGCTP data</LI>
+<LI><B>ais2sgctp</B>: convert GPSD (AIS) data to SGCTP data</LI>
+<LI><B>sbs2sgctp</B>: convert SBS-1 data to SGCTP data</LI>
+<LI><B>flarm2sgctp</B>: convert FLARM data to SGCTP data</LI>
+</UL>
+<P>... for network transmission:</P>
+<UL>
+<LI><B>sgctp2tdp</B>: send SGCTP data via TCP</LI>
+<LI><B>tcp2sgctp</B>: receive SGCTP data via TCP (single client)</LI>
+<LI><B>sgctp2udp</B>: send SGCTP data via UDP</LI>
+<LI><B>udp2sgctp</B>: receive SGCTP data via UDP</LI>
+</UL>
+<P>... for data display or storage</P>
+<UL>
+<LI><B>sgctp2dsv</B>: decode and display SGCTP data as DSV</LI>
+<LI><B>sgctp2xml</B>: decode and display SGCTP data as XML</LI>
+<LI><B>sgctp2gpx</B>: decode and display SGCTP data as GPX</LI>
+</UL>
+<P>... for data aggregation and polling</P>
+<UL>
+<LI><B>sgctphub</B>: aggregates and redistributes the data sent by SGCTP agents</LI>
+<LI><B>hub2sgctp</B>: connects to an SGCTP hub and receives SGCTP data</LI>
+</UL>
+<P>... for data filtering</P>
+<UL>
+<LI><B>sgctpfilter</B>: filter SGCTP data according to specified rules</LI>
+</UL>
+<P>... for developers/administrators</P>
+<UL>
+<LI><B>sgctperror</B>: explains error codes return by SGCTP utilities/library</LI>
+</UL>
+</BLOCKQUOTE>
+</DIV><!-- DIV CLASS="H2" -->
+
+<H2>Copyright</H2>
+<DIV CLASS="H2">
+<P>The <DFN>Simple Geolocalization and Course Transmission Protocol (SGCTP)</DFN> is free software:<BR/>
+you can redistribute it and/or modify it under the terms of the <CITE>GNU General
+Public License as published by the Free Software Foundation, Version 3</CITE>.</P>
+<P>The <DFN>Simple Geolocalization and Course Transmission Protocol (SGCTP)</DFN> is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.</P>
+<P>See the <A HREF="http://www.gnu.org/copyleft/gpl.html" TARGET="_blank">GNU General
+Public License</A> for more details.</P>
+<P>The <DFN>Simple Geolocalization and Course Transmission Protocol (SGCTP)</DFN> includes all resources which contain the
+mention <CODE>&quot;Simple Geolocalization and Course Transmission Protocol (SGCTP)&quot;</CODE> in their preamble.</P>
+<P>Other resources are (and must be) used according to their original license,
+which is (should be made) available from their respective author.</P>
+</DIV><!-- DIV CLASS="H2" -->
+
+<H2>Build and Install</H2>
+<DIV CLASS="H2">
+<P>The first step is recovering the source code using the <CITE>GIT</CITE> versioning system:</P>
+<PRE>
+mkdir /path/to/source && cd /path/to/source
+git clone <A HREF="https://github.com/cedric-dufour/sgctp/" TARGET="_blank">https://github.com/cedric-dufour/sgctp</A>
+</PRE>
+<P>Build environment configuration is then achieved using <CITE>CMake</CITE>:</P>
+<PRE>
+mkdir /path/to/build && cd /path/to/build
+cmake /path/to/source
+</PRE>
+<P>Compilation and installation are then achieved using regular <CITE>Make</CITE>:</P>
+<PRE>
+cd /path/to/build
+make && ls -al ./lib ./bin
+make doc && ls -al ./doc
+make install
+</PRE>
+<P>Alternatively (to <CITE>Make</CITE>), distribution-specific <CITE>Debian</CITE> packages can be built
+and installed using the ad-hoc commands:</P>
+<PRE>
+cd /path/to/source
+debuild -us -uc -b && ls -al ../{lib,}sgctp*.deb
+dpkg -i ../{lib,}sgctp*.deb
+</PRE>
+</DIV><!-- DIV CLASS="H2" -->
+
+<H2>Pre-built Binaries</H2>
+<DIV CLASS="H2">
+<P>Pre-built binary packages for <CITE>Ubuntu</CITE> are available from the author's <CITE>Launchpad
+Personal Package Archive (PPA)</CITE>:</P>
+<PRE>
+<A HREF="https://launchpad.net/~cedric.dufour/+archive/ppa/" TARGET="_blank">https://launchpad.net/~cedric.dufour/+archive/ppa/</A>
+</PRE>
+<P>Please follow the PPA instructions to carry out the installation.</P>
+</DIV><!-- DIV CLASS="H2" -->
+
+<H2>Development</H2>
+<DIV CLASS="H2">
+<P>Please refer to the <I>Library (Development) Documentation</I>.</P>
+</DIV><!-- DIV CLASS="H2" -->
+
+<H2>Usage</H2>
+<DIV CLASS="H2">
+<P><DFN>Simple Geolocalization and Course Transmission Protocol (SGCTP)</DFN> utilities are designed to follow the UNIX/pipe semantic and be chained together in obtain higher level of functionalities.</P>
+<P>Apart from the parameters which are specific to each utility - see its <I>--help</I> or <I>man</I> page for further details - all utilities share common settings, controlling how data are encoded and transmitted. In order to use those settings efficiently, one must understand the few building blocks of the <DFN>Simple Geolocalization and Course Transmission Protocol (SGCTP)</DFN> protocol.</P>
+<H3>Data</H3>
+<P>Given how geolocalization and course data are generated and used, no complex &quot;state machine&quot; is involved - though it could have allowed to (further) lower bandwidth - and each packet contains a &quot;<B>stateful</B>&quot; representation of the data.</P>
+<P>While <B>standard</B> content contains geolocalization and course data, <B>extended</B> content adds information about their source and precision.</P>
+<DIV CLASS="H3">
+</DIV><!-- DIV CLASS="H3" -->
+<H3>Payload</H3>
+<DIV CLASS="H3">
+<P>In order to achieve low-bandwidth, geolocalization and course data are <B>binary-encoded</B>, using as few bits as necessary to obtain a reasonable precision (based on both the usual precision of their sources and the requirements of common usage scenarios).</P>
+<P>This <I>payload</I> is then transmitted according to the user-specified <B>payload type</B>:</P>
+<UL>
+<LI><B>[0] RAW</B>: <I>as is</I></LI>
+<LI><B>[1] AES128</B>: encrypted using <I>AES128+CBC</I> crypto/stream ciphers</LI>
+</UL>
+<P>When using encrypted payload types, one can/must specify additional parameters:</P>
+<UL>
+<LI><B>Principals Database</B>: the file containing the list of principals (users/agents/clients/...) along their password and allowed payload type(s)</LI>
+<LI><B>Principal ID</B>: the ID of the principal to receive/send data</LI>
+<LI><B>Password</B>: the password for the principal used to receive/send data (ignored if a <I>Principals Database</I> has been specified)</LI>
+<LI><B>Password Salt</B>: password salt used to derive the cryptographic key for the principal used to receive/send data (for transmission types that do not generates this salt dynamically/randomly)</LI>
+</UL>
+<P>Note that using encryption will significantly increase bandwidth usage (typically &tilde;2x).</P>
+</DIV><!-- DIV CLASS="H3" -->
+<H3>Transmission</H3>
+<DIV CLASS="H3">
+<P>Once encapsulated according to the specified <I>payload type</I>, geolocalization and course data are:</P>
+<UL>
+<LI>Transmitted via <B>UDP</B>: transmission via UDP offers the benefits of the minimum bandwidth while trading off reliability and security; it should be used within private network segments or only when reliability/security are no major concerns</LI>
+<LI>Transmitted via <B>TCP</B>: transmission via TCP increases bandwidth usage but also increases reliability and (if encryption is used) security; it should be used in public network segments and (along encryption) when privacy and/or authentication is required</LI>
+<LI>Store/read to/from <B>file</B>: for archival purposes</LI>
+</UL>
+</DIV><!-- DIV CLASS="H3" -->
+<H3>Examples</H3>
+<DIV CLASS="H3">
+<UL>
+<LI>Start the <DFN>Simple Geolocalization and Course Transmission Protocol (SGCTP)</DFN> hub:</LI>
+<CODE>sgctphub -P &lt;/path/to/principals&gt;</CODE>
+<LI>Dump data from an GPS receiver and send them (unencrypted) to the hub via UDP:</LI>
+<CODE>gps2sgctp &lt;gpsd-host&gt; | sgctp2udp &lt;hub-host&gt;</CODE>
+<LI>Receive (encrypted) data from the hub via TCP and display them on standard output in XML format:</LI>
+<CODE>hub2sgctp -P &lt;/path/to/principals&gt; -Ti 1 -Ii &lt;principal-ID&gt; &lt;hub-host&gt;| sgctp2xml</CODE>
+</UL>
+</DIV><!-- DIV CLASS="H3" -->
+</DIV><!-- DIV CLASS="H2" -->
+
+</DIV><!-- DIV CLASS="H1" -->
+
+</BODY>
+</HTML>

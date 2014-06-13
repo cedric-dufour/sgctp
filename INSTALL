@@ -1,0 +1,40 @@
+Simple Geolocalization and Course Transmission Protocol (SGCTP)
+===============================================================
+
+Build and Install
+-----------------
+
+The first step is recovering the source code using the GIT versioning system:
+
+  mkdir /path/to/source && cd /path/to/source
+  git clone https://github.com/cedric-dufour/sgctp
+
+Build environment configuration is then achieved using CMake:
+
+  mkdir /path/to/build && cd /path/to/build
+  cmake /path/to/source
+
+Compilation and installation are then achieved using regular Make:
+
+  cd /path/to/build
+  make && ls -al ./lib ./bin
+  make doc && ls -al ./doc
+  make install
+ 
+Alternatively (to Make), distribution-specific Debian packages can be built
+and installed using the ad-hoc commands:
+
+  cd /path/to/source
+  debuild -us -uc -b && ls -al ../{lib,}sgctp*.deb
+  dpkg -i ../{lib,}sgctp*.deb
+
+
+Pre-built Binaries
+------------------
+
+Pre-built binary packages for Ubuntu are available from the author's Launchpad
+Personal Package Archive (PPA):
+
+  https://launchpad.net/~cedric.dufour/+archive/ppa/
+
+Please follow the PPA instructions to carry out the installation.

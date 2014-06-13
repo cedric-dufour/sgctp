@@ -1,0 +1,4 @@
+# With debhelper >= 9, cmake DOES use _FORTIFY_SOURCE=2 in the build process
+# Why are those lintian warnings still present? No clue!...
+sgctp-utils binary: hardening-no-fortify-functions usr/bin/*
+

@@ -1,0 +1,409 @@
+#! /bin/bash
+# INDENTING (emacs/vi): -*- mode:shell-script; tab-width:2; c-basic-offset:2; intent-tabs-mode:nil; -*- ex: set tabstop=2 expandtab:
+### BEGIN INIT INFO
+# Provides:          sgctp-daemons
+# Required-Start:    $remote_fs $syslog $named $network
+# Required-Stop:     $remote_fs $syslog $named $network
+# Should-Start:
+# Should-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start/Stop the SGCTP daemons
+### END INIT INFO
+set -e
+
+## Resources
+. /lib/lsb/init-functions
+
+
+## Parameters
+DESC='SGCTP Daemons'
+DEFAULT=/etc/default/sgctp-daemons
+# Defaults
+PRINCIPALS_PATH=/etc/sgctp/principals
+PRINCIPAL_ID=0
+PAYLOAD_TYPE=0
+TRANSMIT_TYPE=udp
+USER=sgctp
+GROUP=sgctp
+HUB_START=no
+HUB_HOST=localhost
+HUB_OPTIONS=
+GPS_START=no
+GPS_HOST=localhost
+GPS_OPTIONS=
+AIS_START=no
+AIS_HOST=localhost
+AIS_OPTIONS=
+SBS_START=no
+SBS_HOST=localhost
+SBS_OPTIONS=
+FLARM_START=no
+FLARM_DEV=/dev/ttyS0
+FLARM_OPTIONS=
+[ -f "${DEFAULT}" ] && . "${DEFAULT}"
+# Transmit
+EXEC_TX=/usr/bin/sgctp2${TRANSMIT_TYPE}
+# Hub
+EXEC_HUB=/usr/bin/sgctphub
+NAME_HUB=sgctphub
+PID_HUB=/var/run/sgctphub.pid
+# GPS
+EXEC_GPS=/usr/bin/gps2sgctp
+NAME_GPS=gps2sgctp
+FIFO_GPS=/tmp/gps2sgctp.fifo
+PID_GPS_RX=/var/run/gps2sgctp-rx.pid
+PID_GPS_TX=/var/run/gps2sgctp-tx.pid
+# AIS
+EXEC_AIS=/usr/bin/ais2sgctp
+NAME_AIS=ais2sgctp
+FIFO_AIS=/tmp/ais2sgctp.fifo
+PID_AIS_RX=/var/run/ais2sgctp-rx.pid
+PID_AIS_TX=/var/run/ais2sgctp-tx.pid
+# SBS
+EXEC_SBS=/usr/bin/sbs2sgctp
+NAME_SBS=sbs2sgctp
+FIFO_SBS=/tmp/sbs2sgctp.fifo
+PID_SBS_RX=/var/run/sbs2sgctp-rx.pid
+PID_SBS_TX=/var/run/sbs2sgctp-tx.pid
+# FLARM
+EXEC_FLARM=/usr/bin/flarm2sgctp
+NAME_FLARM=flarm2sgctp
+FIFO_FLARM=/tmp/flarm2sgctp.fifo
+PID_FLARM_RX=/var/run/flarm2sgctp-rx.pid
+PID_FLARM_TX=/var/run/flarm2sgctp-tx.pid
+
+# Check executable
+[ ! -x "${EXEC_TX}" ] && echo "ERROR: Missing/invalid executable (${EXEC_TX})" >&2 && exit 1
+
+
+## Functions
+
+# Hub
+function start_hub {
+  # Enabled?
+  [ "${HUB_START}" != 'yes' ] && return 0
+
+  # Check executable
+  [ ! -x "${EXEC_HUB}" ] && echo "ERROR: Missing/invalid executable (${EXEC_HUB})" >&2 && return 1
+
+  # Start daemon
+  log_daemon_msg "Starting ${DESC}" "${NAME_HUB}"
+  if start-stop-daemon --start --quiet --oknodo --pidfile "${PID_HUB}" --exec "${EXEC_HUB}" -- -P "${PRINCIPALS_PATH}" -D -Du ${USER} -Dg ${GROUP} -Dp "${PID_HUB}" --syslog ${HUB_OPTIONS}; then
+    log_end_msg 0
+  else
+    log_end_msg 1
+  fi
+}
+
+function stop_hub {
+  # Enabled?
+  [ "${HUB_START}" != 'yes' ] && return 0
+
+  # Stop daemon
+	log_daemon_msg "Stopping ${DESC}" "${NAME_HUB}"
+  if start-stop-daemon --stop --quiet --oknodo --pidfile "${PID_HUB}"; then
+    log_end_msg 0
+  else
+    log_end_msg 1
+  fi
+}
+
+function status_hub {
+  # Enabled?
+  [ "${HUB_START}" != 'yes' ] && return 0
+
+  # Status
+  status_of_proc -p "${PID_HUB}" "${EXEC_HUB}" "${NAME_HUB}" || :
+}
+
+# GPS
+function start_gps {
+  # Enabled?
+  [ "${GPS_START}" != 'yes' ] && return 0
+
+  # Check executable
+  [ ! -x "${EXEC_GPS}" ] && echo "ERROR: Missing/invalid executable (${EXEC_GPS})" >&2 && return 1
+
+  # Start daemon
+  # ... FIFO
+  rm -f "${FIFO_GPS}"
+  mkfifo "${FIFO_GPS}"
+  chown ${USER}:nogroup "${FIFO_GPS}"
+  chmod 600 "${FIFO_GPS}"
+  # ... TX
+  log_daemon_msg "Starting ${DESC}" "${NAME_GPS} (TX)"
+  if start-stop-daemon --start --quiet --oknodo --pidfile "${PID_GPS_TX}" --exec "${EXEC_TX}" -- ${HUB_HOST} "${FIFO_GPS}" -P "${PRINCIPALS_PATH}" -Io ${PRINCIPAL_ID} -To ${PAYLOAD_TYPE} -D -Du ${USER} -Dg ${GROUP} -Dp "${PID_GPS_TX}" --syslog; then
+    log_end_msg 0
+  else
+    log_end_msg 1
+  fi
+  # ... RX
+  log_daemon_msg "Starting ${DESC}" "${NAME_GPS} (RX)"
+  if start-stop-daemon --start --quiet --oknodo --pidfile "${PID_GPS_RX}" --exec "${EXEC_GPS}" -- ${GPS_HOST} -o "${FIFO_GPS}" -D -Du ${USER} -Dg ${GROUP} -Dp "${PID_GPS_RX}" --syslog ${GPS_OPTIONS}; then
+    log_end_msg 0
+  else
+    log_end_msg 1
+  fi
+}
+
+function stop_gps {
+  # Enabled?
+  [ "${GPS_START}" != 'yes' ] && return 0
+
+  # Stop daemon
+  # ... RX
+	log_daemon_msg "Stopping ${DESC}" "${NAME_GPS} (RX)"
+  if start-stop-daemon --stop --quiet --oknodo --pidfile "${PID_GPS_RX}"; then
+    log_end_msg 0
+  else
+    log_end_msg 1
+  fi
+  # ... TX
+	log_daemon_msg "Stopping ${DESC}" "${NAME_GPS} (TX)"
+  if start-stop-daemon --stop --quiet --oknodo --pidfile "${PID_GPS_TX}"; then
+    log_end_msg 0
+  else
+    log_end_msg 1
+  fi
+  # ... FIFO
+  rm -f "${FIFO_GPS}"
+}
+
+function status_gps {
+  # Enabled?
+  [ "${GPS_START}" != 'yes' ] && return 0
+
+  # Status
+  status_of_proc -p "${PID_GPS_RX}" "${EXEC_GPS}" "${NAME_GPS} (TX)" || :
+  status_of_proc -p "${PID_GPS_TX}" "${EXEC_TX}" "${NAME_GPS} (RX)" || :
+}
+
+# AIS
+function start_ais {
+  # Enabled?
+  [ "${AIS_START}" != 'yes' ] && return 0
+
+  # Check executable
+  [ ! -x "${EXEC_AIS}" ] && echo "ERROR: Missing/invalid executable (${EXEC_AIS})" >&2 && return 1
+
+  # Start daemon
+  # ... FIFO
+  rm -f "${FIFO_AIS}"
+  mkfifo "${FIFO_AIS}"
+  chown ${USER}:nogroup "${FIFO_AIS}"
+  chmod 600 "${FIFO_AIS}"
+  # ... TX
+  log_daemon_msg "Starting ${DESC}" "${NAME_AIS} (TX)"
+  if start-stop-daemon --start --quiet --oknodo --pidfile "${PID_AIS_TX}" --exec "${EXEC_TX}" -- ${HUB_HOST} "${FIFO_AIS}" -P "${PRINCIPALS_PATH}" -Io ${PRINCIPAL_ID} -To ${PAYLOAD_TYPE} -D -Du ${USER} -Dg ${GROUP} -Dp "${PID_AIS_TX}" --syslog; then
+    log_end_msg 0
+  else
+    log_end_msg 1
+  fi
+  # ... RX
+  log_daemon_msg "Starting ${DESC}" "${NAME_AIS} (RX)"
+  if start-stop-daemon --start --quiet --oknodo --pidfile "${PID_AIS_RX}" --exec "${EXEC_AIS}" -- ${AIS_HOST} -o "${FIFO_AIS}" -D -Du ${USER} -Dg ${GROUP} -Dp "${PID_AIS_RX}" --syslog ${AIS_OPTIONS}; then
+    log_end_msg 0
+  else
+    log_end_msg 1
+  fi
+}
+
+function stop_ais {
+  # Enabled?
+  [ "${AIS_START}" != 'yes' ] && return 0
+
+  # Stop daemon
+  # ... RX
+	log_daemon_msg "Stopping ${DESC}" "${NAME_AIS} (RX)"
+  if start-stop-daemon --stop --quiet --oknodo --pidfile "${PID_AIS_RX}"; then
+    log_end_msg 0
+  else
+    log_end_msg 1
+  fi
+  # ... TX
+	log_daemon_msg "Stopping ${DESC}" "${NAME_AIS} (TX)"
+  if start-stop-daemon --stop --quiet --oknodo --pidfile "${PID_AIS_TX}"; then
+    log_end_msg 0
+  else
+    log_end_msg 1
+  fi
+  # ... FIFO
+  rm -f "${FIFO_AIS}"
+}
+
+function status_ais {
+  # Enabled?
+  [ "${AIS_START}" != 'yes' ] && return 0
+
+  # Status
+  status_of_proc -p "${PID_AIS_RX}" "${EXEC_AIS}" "${NAME_AIS} (TX)" || :
+  status_of_proc -p "${PID_AIS_TX}" "${EXEC_TX}" "${NAME_AIS} (RX)" || :
+}
+
+# SBS
+function start_sbs {
+  # Enabled?
+  [ "${SBS_START}" != 'yes' ] && return 0
+
+  # Check executable
+  [ ! -x "${EXEC_SBS}" ] && echo "ERROR: Missing/invalid executable (${EXEC_SBS})" >&2 && return 1
+
+  # Start daemon
+  # ... FIFO
+  rm -f "${FIFO_SBS}"
+  mkfifo "${FIFO_SBS}"
+  chown ${USER}:nogroup "${FIFO_SBS}"
+  chmod 600 "${FIFO_SBS}"
+  # ... TX
+  log_daemon_msg "Starting ${DESC}" "${NAME_SBS} (TX)"
+  if start-stop-daemon --start --quiet --oknodo --pidfile "${PID_SBS_TX}" --exec "${EXEC_TX}" -- ${HUB_HOST} "${FIFO_SBS}" -P "${PRINCIPALS_PATH}" -Io ${PRINCIPAL_ID} -To ${PAYLOAD_TYPE} -D -Du ${USER} -Dg ${GROUP} -Dp "${PID_SBS_TX}" --syslog; then
+    log_end_msg 0
+  else
+    log_end_msg 1
+  fi
+  # ... RX
+  log_daemon_msg "Starting ${DESC}" "${NAME_SBS} (RX)"
+  if start-stop-daemon --start --quiet --oknodo --pidfile "${PID_SBS_RX}" --exec "${EXEC_SBS}" -- ${SBS_HOST} -o "${FIFO_SBS}" -D -Du ${USER} -Dg ${GROUP} -Dp "${PID_SBS_RX}" --syslog ${SBS_OPTIONS}; then
+    log_end_msg 0
+  else
+    log_end_msg 1
+  fi
+}
+
+function stop_sbs {
+  # Enabled?
+  [ "${SBS_START}" != 'yes' ] && return 0
+
+  # Stop daemon
+  # ... RX
+	log_daemon_msg "Stopping ${DESC}" "${NAME_SBS} (RX)"
+  if start-stop-daemon --stop --quiet --oknodo --pidfile "${PID_SBS_RX}"; then
+    log_end_msg 0
+  else
+    log_end_msg 1
+  fi
+  # ... TX
+	log_daemon_msg "Stopping ${DESC}" "${NAME_SBS} (TX)"
+  if start-stop-daemon --stop --quiet --oknodo --pidfile "${PID_SBS_TX}"; then
+    log_end_msg 0
+  else
+    log_end_msg 1
+  fi
+  # ... FIFO
+  rm -f "${FIFO_SBS}"
+}
+
+function status_sbs {
+  # Enabled?
+  [ "${SBS_START}" != 'yes' ] && return 0
+
+  # Status
+  status_of_proc -p "${PID_SBS_RX}" "${EXEC_SBS}" "${NAME_SBS} (TX)" || :
+  status_of_proc -p "${PID_SBS_TX}" "${EXEC_TX}" "${NAME_SBS} (RX)" || :
+}
+
+# FLARM
+function start_flarm {
+  # Enabled?
+  [ "${FLARM_START}" != 'yes' ] && return 0
+
+  # Check executable
+  [ ! -x "${EXEC_FLARM}" ] && echo "ERROR: Missing/invalid executable (${EXEC_FLARM})" >&2 && return 1
+
+  # Start daemon
+  # ... FIFO
+  rm -f "${FIFO_FLARM}"
+  mkfifo "${FIFO_FLARM}"
+  chown ${USER}:nogroup "${FIFO_FLARM}"
+  chmod 600 "${FIFO_FLARM}"
+  # ... TX
+  log_daemon_msg "Starting ${DESC}" "${NAME_FLARM} (TX)"
+  if start-stop-daemon --start --quiet --oknodo --pidfile "${PID_FLARM_TX}" --exec "${EXEC_TX}" -- ${HUB_HOST} "${FIFO_FLARM}" -P "${PRINCIPALS_PATH}" -Io ${PRINCIPAL_ID} -To ${PAYLOAD_TYPE} -D -Du ${USER} -Dg ${GROUP} -Dp "${PID_FLARM_TX}" --syslog; then
+    log_end_msg 0
+  else
+    log_end_msg 1
+  fi
+  # ... RX
+  log_daemon_msg "Starting ${DESC}" "${NAME_FLARM} (RX)"
+  if start-stop-daemon --start --quiet --oknodo --pidfile "${PID_FLARM_RX}" --exec "${EXEC_FLARM}" -- ${FLARM_DEV} -o "${FIFO_FLARM}" -D -Du ${USER} -Dg ${GROUP} -Dp "${PID_FLARM_RX}" --syslog ${FLARM_OPTIONS}; then
+    log_end_msg 0
+  else
+    log_end_msg 1
+  fi
+}
+
+function stop_flarm {
+  # Enabled?
+  [ "${FLARM_START}" != 'yes' ] && return 0
+
+  # Stop daemon
+  # ... RX
+	log_daemon_msg "Stopping ${DESC}" "${NAME_FLARM} (RX)"
+  if start-stop-daemon --stop --quiet --oknodo --pidfile "${PID_FLARM_RX}"; then
+    log_end_msg 0
+  else
+    log_end_msg 1
+  fi
+  # ... TX
+	log_daemon_msg "Stopping ${DESC}" "${NAME_FLARM} (TX)"
+  if start-stop-daemon --stop --quiet --oknodo --pidfile "${PID_FLARM_TX}"; then
+    log_end_msg 0
+  else
+    log_end_msg 1
+  fi
+  # ... FIFO
+  rm -f "${FIFO_FLARM}"
+}
+
+function status_flarm {
+  # Enabled?
+  [ "${FLARM_START}" != 'yes' ] && return 0
+
+  # Status
+  status_of_proc -p "${PID_FLARM_RX}" "${EXEC_FLARM}" "${NAME_FLARM} (TX)" || :
+  status_of_proc -p "${PID_FLARM_TX}" "${EXEC_TX}" "${NAME_FLARM} (RX)" || :
+}
+
+
+## Main
+case "${1}" in
+
+  start)
+	  start_hub
+	  start_gps
+	  start_ais
+	  start_sbs
+	  start_flarm
+    ;;
+
+  stop)
+	  stop_flarm
+	  stop_sbs
+	  stop_ais
+	  stop_gps
+	  stop_hub
+    ;;
+
+  restart|force-reload)
+    "${0}" stop
+    "${0}" start
+    ;;
+
+  status)
+	  status_hub
+	  status_gps
+	  status_ais
+	  status_sbs
+	  status_flarm
+    ;;
+
+  *)
+    log_failure_msg "USAGE: ${0} {start|stop|restart|force-reload|status}" 
+    exit 1
+    ;;
+
+esac
+
+# Done
+exit 0

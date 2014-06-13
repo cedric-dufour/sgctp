@@ -1,0 +1,75 @@
+## General settings
+
+# Principals (database) path
+#PRINCIPALS_PATH=/etc/sgctp/principals
+
+# Principal ID
+#PRINCIPAL_ID=0
+
+# Payload type
+#  0 = RAW
+#  1 = AES128
+#PAYLOAD_TYPE=0
+
+# Transmission type
+#TRANSMIT_TYPE=udp
+
+
+## Hub settings
+
+# Start the daemon
+#HUB_START=no
+
+# Hub host (for other daemons)
+#HUB_HOST=localhost
+
+# Additional options
+#HUB_OPTIONS=
+
+
+## GPS settings
+
+# Start the daemon
+#GPS_START=no
+
+# GPSD host
+#GPS_HOST=localhost
+
+# Additional options
+#GPS_OPTIONS=
+
+
+## AIS settings
+
+# Start the daemon
+#AIS_START=no
+
+# GPSD (AIS) host
+#AIS_HOST=localhost
+
+# Additional options
+#AIS_OPTIONS=
+
+
+## SBS settings
+
+# Start the daemon
+#SBS_START=no
+
+# SBS-1 host
+#SBS_HOST=localhost
+
+# Additional options
+#SBS_OPTIONS=
+
+
+## FLARM settings
+
+# Start the daemon
+#FLARM_START=no
+
+# FLARM device
+#FLARM_DEV=/dev/ttyS0
+
+# Additional options
+#FLARM_OPTIONS=

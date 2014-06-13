@@ -1,0 +1,6 @@
+sgctp (1.0.20140613~rc1) UNRELEASED; urgency=low
+
+  * INITIAL RELEASE (see https://github.com/cedric-dufour/sgctp for detailed changelog)
+
+ -- Cedric Dufour <cedric.dufour@ced-network.net>  Fri, 13 Jun 2014 00:00:00 +0200
+

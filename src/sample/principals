@@ -1,0 +1,52 @@
+######################################################################
+# SGCTP Principals Database
+######################################################################
+#
+# This file contains the list of SGCTP principals IDs, passwords and
+# allowed payload types.
+#
+# Modifications are enforced immediately (it is NOT required to
+# restart SGCTP utilities).
+#
+# The file is a colon-separated values list, formatted as:
+#
+#   UINT64_ID:CHAR[255]_PASSWORD:PAYLOAD_TYPES
+#
+# where PAYLOAD_TYPES is a comma-separated list:
+#
+#   [UINT8_PAYLOAD_TYPE[,UINT8_PAYLOAD_TYPE,...]]
+#
+# Blank password is allowed. Also, password will not be used by non-
+# encrypted payload types.
+#
+# Empty payload types list is allowed, meaning any payload type may is
+# authorized. Also, payload type 255 can be used to specifically deny
+# access to a given principal.
+#
+# Available payload types are:
+#   0 - raw payload      (unencrypted; unauthenticated)
+#   1 - AES-128 payload  (AES-128 encrypted; authenticated)
+#
+# The default ("anonymous") principal 0 (zero) can also be specified,
+# in order to deny its access (payload type 255) or to mandate specific
+# payload types (and password).
+#
+# Example: define the 123456789 principal (ID) and allows it to use
+# all payload types (note that specifying a password here is useless,
+# since the principal is allowed to use payload types where it is not
+# relevant)
+#
+#   123456789::
+# 
+# Example: define the 987654321 principal (ID) and allows it to use
+# only the AES-128 payload type, with the given password
+#
+#   987654321:password:1
+#
+# Example: deny access to the "anonymous" principal; this is particularly
+# useful for the hub (but remember to disable its "anonymous" UDP agents
+# port)
+#
+#   0::255
+#
+######################################################################

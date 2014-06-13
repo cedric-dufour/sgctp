@@ -1,0 +1,3 @@
+debian/tmp/usr/include
+debian/tmp/usr/lib/libsgctp.a
+debian/tmp/usr/lib/libsgctp.so

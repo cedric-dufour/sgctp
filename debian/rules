@@ -1,0 +1,91 @@
+#!/usr/bin/make -f
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/cmake.mk
+
+# Required for 'help2man'
+LD_LIBRARY_PATH:=debian/tmp/usr/lib:${LD_LIBRARY_PATH}
+PATH:=debian/tmp/usr/bin:${PATH}
+
+build:
+	# Build documentation
+	$(MAKE) -C $(DEB_BUILDDIR) doc
+
+install/libsgctp-dev::
+	# Copy header files
+	mkdir -p debian/tmp/usr/include
+	cp -rp src/lib/sgctp debian/tmp/usr/include/sgctp
+	# Copy static library 
+	cp $(DEB_BUILDDIR)/lib/libsgctp_static.a debian/tmp/usr/lib/libsgctp.a
+
+install/sgctp-utils::
+	$(eval VERSION := $(shell cat $(DEB_BUILDDIR)/VERSION))
+	# Create man pages
+	mkdir -p debian/tmp/usr/share/man/man1
+	help2man \
+		--name 'Dump the SGCTP data of the given file to DSV' \
+		--help-option --help --version-string $(VERSION) --no-discard-stderr --no-info \
+		sgctp2dsv | fgrep -v 'invalid option' > debian/tmp/usr/share/man/man1/sgctp2dsv.1
+	help2man \
+		--name 'Dump the SGCTP data of the given file to XML' \
+		--help-option --help --version-string $(VERSION) --no-discard-stderr --no-info \
+		sgctp2xml | fgrep -v 'invalid option' > debian/tmp/usr/share/man/man1/sgctp2xml.1
+	help2man \
+		--name 'Dump the SGCTP data of the given file to GPX' \
+		--help-option --help --version-string $(VERSION) --no-discard-stderr --no-info \
+		sgctp2gpx | fgrep -v 'invalid option' > debian/tmp/usr/share/man/man1/sgctp2gpx.1
+	help2man \
+		--name 'Send SGCTP data to the given host, via UDP' \
+		--help-option --help --version-string $(VERSION) --no-discard-stderr --no-info \
+		sgctp2udp | fgrep -v 'invalid option' > debian/tmp/usr/share/man/man1/sgctp2udp.1
+	help2man \
+		--name 'Send SGCTP data to the given host, via TCP' \
+		--help-option --help --version-string $(VERSION) --no-discard-stderr --no-info \
+		sgctp2tcp | fgrep -v 'invalid option' > debian/tmp/usr/share/man/man1/sgctp2tcp.1
+	help2man \
+		--name 'Dump the SGCTP data received from the given GPSD host' \
+		--help-option --help --version-string $(VERSION) --no-discard-stderr --no-info \
+		gps2sgctp | fgrep -v 'invalid option' > debian/tmp/usr/share/man/man1/gps2sgctp.1
+	help2man \
+		--name 'Dump the SGCTP data received from the given GPSD (AIS) host' \
+		--help-option --help --version-string $(VERSION) --no-discard-stderr --no-info \
+		ais2sgctp | fgrep -v 'invalid option' > debian/tmp/usr/share/man/man1/ais2sgctp.1
+	help2man \
+		--name 'Dump the SGCTP data received from the given SBS-1 host' \
+		--help-option --help --version-string $(VERSION) --no-discard-stderr --no-info \
+		sbs2sgctp | fgrep -v 'invalid option' > debian/tmp/usr/share/man/man1/sbs2sgctp.1
+	help2man \
+		--name 'Dump the SGCTP data received from the given FLARM host' \
+		--help-option --help --version-string $(VERSION) --no-discard-stderr --no-info \
+		flarm2sgctp | fgrep -v 'invalid option' > debian/tmp/usr/share/man/man1/flarm2sgctp.1
+	help2man \
+		--name 'Dump the SGCTP data received via UDP' \
+		--help-option --help --version-string $(VERSION) --no-discard-stderr --no-info \
+		udp2sgctp | fgrep -v 'invalid option' > debian/tmp/usr/share/man/man1/udp2sgctp.1
+	help2man \
+		--name 'Dump the SGCTP data received via TCP' \
+		--help-option --help --version-string $(VERSION) --no-discard-stderr --no-info \
+		tcp2sgctp | fgrep -v 'invalid option' > debian/tmp/usr/share/man/man1/tcp2sgctp.1
+	help2man \
+		--name 'Filter SGCTP data' \
+		--help-option --help --version-string $(VERSION) --no-discard-stderr --no-info \
+		sgctpfilter | fgrep -v 'invalid option' > debian/tmp/usr/share/man/man1/sgctpfilter.1
+	help2man \
+		--name 'SGCTP data aggregation and redistribution hub' \
+		--help-option --help --version-string $(VERSION) --no-discard-stderr --no-info \
+		sgctphub | fgrep -v 'invalid option' > debian/tmp/usr/share/man/man1/sgctphub.1
+	help2man \
+		--name 'Dump the SGCTP data received from the given SGCTP hub' \
+		--help-option --help --version-string $(VERSION) --no-discard-stderr --no-info \
+		hub2sgctp | fgrep -v 'invalid option' > debian/tmp/usr/share/man/man1/hub2sgctp.1
+	help2man \
+		--name 'Explains the SGCTP error corresponding to the given error code' \
+		--help-option --help --version-string $(VERSION) --no-discard-stderr --no-info \
+		sgctperror | fgrep -v 'invalid option' > debian/tmp/usr/share/man/man1/sgctperror.1
+
+install/sgctp-daemons::
+	# Create principals database
+	mkdir -p debian/tmp/etc/sgctp
+	cp src/sample/principals debian/tmp/etc/sgctp
+
+clean::

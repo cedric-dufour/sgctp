@@ -1,0 +1,296 @@
+Simple Geolocalization and Course Transmission Protocol (SGCTP)
+***************************************************************
+
+Payload
+=======
+76543210: bits (network ordered: most significant bit/byte first)
+
+Content:
+x       : 1 => 2D position (longitude, latitude)
+ x      : 1 => 3D position (elevation)
+  x     : 1 => 2D ground course (bearing, ground speed)
+   x    : 1 => 3D ground course (vertical speed)
+    x   : 1 => 2D acceleration data (speed/s, bearing/s)
+     x  : 1 => 3D acceleration data (pitch/s)
+      x : 1 => 2D apparent course (heading, apparent speed)
+       x: 1 => Extended Content
+
+ID':
+xxxxxxx : 0..127 => ID length (bytes)
+       x: 1 => packet include data; see Data
+
+ID:       (if ID length > 0; see ID')
+<ID length bytes>
+NOTE: ASCII-encoded string
+
+Data':    (if packet includes data; see ID':0)
+xxxxxxx : 0 => invalid; 1..127 => data length (bytes)
+       x: 1 => data length > 127; see Data"
+
+Data":    (if data length > 127; see Data')
+xxxxxxxx: 0 => invalid; 1..255 => additional data length (*128 bytes)
+
+Data:     (if data length > 0; see Data'/Data")
+<data length bytes>
+NOTE: unspecified format
+
+Time:               unit     offset  overflow
+23 bits: time       0.1s          0  n/a
+NOTE: without date part (starting from 00:00:00.0), UTC timezone
+
+2D position:        unit     offset  overflow
+30 bits: latitude   1ms   536870912  n/a
+31 bits: longitude  1ms  1073741824  n/a
+NOTE: according to WGS-84 referential
+
+3D position:        unit     offset  overflow
+19 bits: elevation  0.1m     131072  0(-) or 524287(+)
+NOTE: according to WGS-84 referential
+
+2D ground course:   unit     offset  overflow
+12 bits: bearing    0.1deg        0  n/a
+16 bits: g.speed    0.1m/s        1  0(-) or 65535(+)
+
+3D ground course:   unit     offset
+13 bits: v.speed    0.1m/s     4096  0(-) or 8191(+)
+
+2D acceleration     unit     offset  overflow
+10 bits: bearing/s  0.1deg/s    512  0(-) or 1023(+)
+12 bits: g.speed/s  0.1m/s2    2048  0(-) or 4095(+)
+
+3D acceleration     unit     offset  overflow
+12 bits: v.speed/s  0.1m/s2    2048  0(-) or 4095(+)
+
+2D apparent course: unit     offset  overflow
+12 bits: heading    0.1deg        0  n/a
+16 bits: a.speed    0.1m/s        1  0(-) or 65535(+)
+
+Padding:
+n-bits:   byte re-alignment
+
+Extended content: (if packet includes extended content; see Content:0)
+x       : 1 => 2D position (longitude, latitude) error
+ x      : 1 => 3D position (elevation) error
+  x     : 1 => 2D ground course (bearing, ground speed) error
+   x    : 1 => 3D ground course (vertical speed) error
+    x   : 1 => 2D acceleration data (speed/s, bearing/s) error
+     x  : 1 => 3D acceleration data (pitch/s) error
+      x : 1 => 2D apparent course (heading, apparent speed) error
+       x: 1 => reserved (Extended Content II)
+
+Source type: (if packet includes extended content; see Content:0)
+xxxxxxxx: 0   = GPS
+          1   = AIS
+          2   = ADS-B
+          3   = FLARM
+          255 = UNDEFINED
+
+2D position error:  unit     offset  overflow
+12 bits: longitude  0.1m          0  4095(+)
+12 bits: latitude   0.1m          0  4095(+)
+
+3D position error:  unit     offset  overflow
+12 bits: elevation  0.1m          0  4095(+)
+
+2D g.course error:  unit     offset  overflow
+ 8 bits: bearing    0.1deg        0  255(+)
+ 8 bits: g.speed    0.1m/s        0  255(+)
+
+3D g.course error:  unit     offset
+ 8 bits: v.speed    0.1m/s        0  255(+)
+
+2D acceleration     unit     offset  overflow
+ 8 bits: bearing/s  0.1deg/s      0  255(+)
+ 8 bits: g.speed/s  0.1m/s2       0  255(+)
+
+3D acceleration     unit     offset  overflow
+ 8 bits: v.speed/s  0.1m/s2       0  255(+)
+
+2D apparent course: unit     offset  overflow
+ 8 bits: heading    0.1deg        0  255(+)
+ 8 bits: a.speed    0.1m/s        0  255(+)
+
+
+Payload Size
+============
+
+Minimum:
+Content:          8 bits
+ID':              8 bits
+Time:            23 bits
+SUB-TOTAL:       39 bits
+Unused:           1 bit
+TOTAL:           40 bits ( 5 bytes)
+
+Typical (GPS):
+Content:          8 bits
+ID':              8 bits
+ID:              40 bits ( 5 bytes)
+Time:            23 bits
+2D position:     61 bits
+3D position:     19 bits
+SUB-TOTAL:      159 bits
+Unused:           1 bit
+TOTAL:          160 bits (20 bytes)
+
+Typical (AIS):
+Content:          8 bits
+ID':              8 bits
+ID:              72 bits ( 9 bytes)
+Time:            23 bits
+2D position:     61 bits
+2D g.course:     28 bits
+SUB-TOTAL:      200 bits
+Unused:           0 bit
+TOTAL:          200 bits (25 bytes)
+
+Typical (ADS-B):
+Content:          8 bits
+ID':              8 bits
+ID:              48 bits ( 6 bytes)
+Time:            23 bits
+2D position:     61 bits
+3D position:     19 bits
+2D g.course:     28 bits
+3D g.course:     13 bits
+SUB-TOTAL:      208 bits
+Unused:           0 bits
+TOTAL:          208 bits (26 bytes)
+
+Maximum (no data):
+Content:          8 bits
+ID':              8 bits
+ID:            1016 bits (127 bytes)
+Time:            23 bits
+2D position:     61 bits
+3D position:     19 bits
+2D g.course:     28 bits
+3D g.course:     13 bits
+2D accel.:       22 bits
+3D accel.:       12 bits
+2D a.course:     28 bits
+Padding:          2 bits
+SUB-TOTAL:     1240 bits
+Ext.content:      8 bits
+Source type:      8 bits
+2D pos.err:      12 bits
+3D pos.err:      24 bits
+2D g.cs.err:     16 bits
+3D g.cs.err:      8 bits
+2D acc.err:      16 bits
+3D acc.err:       8 bits
+2D a.cs.err:     16 bits
+SUB-TOTAL:      116 bits
+TOTAL:         1352 bits (170 bytes)
+
+Maximum (no data):
+Content:          8 bits
+ID':              8 bits
+ID:            1016 bits (127 bytes)
+Data':            8 bits
+Data":            8 bits
+Data:        262136 bits (32767 bytes)
+Time:            23 bits
+2D position:     61 bits
+3D position:     19 bits
+2D g.course:     28 bits
+3D g.course:     13 bits
+2D accel.:       22 bits
+3D accel.:       12 bits
+2D a.course:     28 bits
+Padding:          2 bits
+SUB-TOTAL:   263393 bits
+Ext.content:      8 bits
+Source type:      8 bits
+2D pos.err:      24 bits
+3D pos.err:      12 bits
+2D g.cs.err:     16 bits
+3D g.cs.err:      8 bits
+2D acc.err:      16 bits
+3D acc.err:       8 bits
+2D a.cs.err:     16 bits
+SUB-TOTAL:      112 bits
+TOTAL:       263508 bits (32939 bytes)
+
+
+AES128 Payload
+==============
+128-bits: IV
+........: AES128( key, raw payload + seal )
+   where: key  = PKCS5_PBKDF2_HMAC_SHA1( password, nonce, 16384 iter, 160 bits )[0:128[
+          seal = PKCS5_PBKDF2_HMAC_SHA1( password, nonce, 16384 iter, 160 bits )[128:160[
+
+
+UDP Transmission
+================
+
+UDP is intented to be used only to send data within trusted network and/or
+when minimal bandwith usage is required.
+
+The UDP packet consists only of the SGCTP payload (RAW or AES128), with just
+an additional length header. Thus, there is no version check and no principal
+identification (except for its IP address). Payload type and parameters must
+be agreed to out-of-band.
+
+The UDP packet is thus constructed as:
+
+Packets
+-------
+16-bits: payload length
+.......: (Raw) payload
+
+
+TCP Transmission
+================
+
+TCP is intended to be used when principal identification and adaptive payload
+negotiation is required.
+
+The addition of the corresponding data results in a larger payload.
+(about twice the size of its UDP counter part, for a typical GPS payload)
+
+The TCP packets are thus constructed as:
+
+Handshake
+---------
+[CLIENT -> SERVER]
+40-bits: "SGCTP" (ASCII)
+ 8-bits: protocol version; 1 = 1st version
+ 8-bits: payload types
+         0 => (Raw) payload
+         1 => AES128 payload
+64-bits: principal ID (64-bit integer); 0 = anonymous
+<payload-specific handshake>
+
+Payload-specific handshake (payload type 0):
+none
+
+Payload-specific handshake (payload type 1):
+[CLIENT -> SERVER]
+128-bits: client nonce (password salt)
+[CLIENT / SERVER]
+key0=PKCS5_PBKDF2_HMAC_SHA1( password, client nonce, 16384 iter, 160 bits )[0:128[
+seal=PKCS5_PBKDF2_HMAC_SHA1( password, client nonce, 16384 iter, 160 bits )[128:160[
+[SERVER -> CLIENT]
+SGCTP payload AES128(key0): data = server nonce (session token)
+[CLIENT / SERVER]
+key =PKCS5_PBKDF2_HMAC_SHA1( server nonce, client nonce, 16384 iter, 160 bits )[0:128[
+seal=PKCS5_PBKDF2_HMAC_SHA1( server nonce, client nonce, 16384 iter, 160 bits )[128:160[
+[CLIENT -> SERVER]
+SGCTP payload AES128(key): ID = "#AUTH"
+[SERVER -> CLIENT]
+SGCTP payload AES128(key): ID = "#OK"
+
+Packets
+-------
+16-bits: payload length
+.......: SGCTP payload (according to handshake-specified type)
+<payload-specific actions>
+
+Payload-specific actions (payload type 0):
+none
+
+Payload-specific actions (payload type 1):
+[CLIENT / SERVER]
+key =PKCS5_PBKDF2_HMAC_SHA1( key, client nonce, 1 iter, 160 bits )[0:128[
+seal=PKCS5_PBKDF2_HMAC_SHA1( key, client nonce, 1 iter, 160 bits )[128:160[

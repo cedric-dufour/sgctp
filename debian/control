@@ -1,0 +1,81 @@
+Source: sgctp
+Section: misc
+Priority: optional
+Maintainer: Cedric Dufour <cedric.dufour@ced-network.net>
+Build-Depends: cdbs, cmake (>= 2.8), debhelper (>= 9), doxygen, help2man, libboost-dev | libboost1.50-dev, libgcrypt11-dev, libgps-dev
+Standards-Version: 3.8.4
+Homepage: http://cedric.dufour.name/software/sgctp
+
+Package: libsgctp1
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Simple Geolocalization and Course Transmission Protocol (SGCTP)
+ The objective of the Simple Geolocalization and Course Transmission
+ Protocol (SGCTP) is to transmit 2- or 3-dimensional position and motion data
+ in such a way as to use as little bandwidth as possible, thus making it fit
+ to aggregate data from roaming clients with limited network connectivity.
+ . 
+ This package contains the SGCTP (dynamic) library resources.
+
+Package: libsgctp-dev
+Section: libdevel
+Architecture: any
+Depends: libsgctp1, ${misc:Depends}
+Description: Simple Geolocalization and Course Transmission Protocol (SGCTP)
+ The objective of the Simple Geolocalization and Course Transmission
+ Protocol (SGCTP) is to transmit 2- or 3-dimensional position and motion data
+ in such a way as to use as little bandwidth as possible, thus making it fit
+ to aggregate data from roaming clients with limited network connectivity.
+ . 
+ This package contains SGCTP (library) development resources.
+
+Package: libsgctp-doc
+Section: doc
+Architecture: all
+Depends: ${misc:Depends}
+Recommends: libsgctp-dev
+Description: Simple Geolocalization and Course Transmission Protocol (SGCTP)
+ The objective of the Simple Geolocalization and Course Transmission
+ Protocol (SGCTP) is to transmit 2- or 3-dimensional position and motion data
+ in such a way as to use as little bandwidth as possible, thus making it fit
+ to aggregate data from roaming clients with limited network connectivity.
+ . 
+ This package contains SGCTP (library) development documentation.
+
+Package: sgctp-utils
+Section: utils
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Simple Geolocalization and Course Transmission Protocol (SGCTP)
+ The objective of the Simple Geolocalization and Course Transmission
+ Protocol (SGCTP) is to transmit 2- or 3-dimensional position and motion data
+ in such a way as to use as little bandwidth as possible, thus making it fit
+ to aggregate data from roaming clients with limited network connectivity.
+ . 
+ This package contains SGCTP utilities.
+
+Package: sgctp-utils-doc
+Section: doc
+Architecture: all
+Depends: ${misc:Depends}
+Recommends: sgctp-utils
+Description: Simple Geolocalization and Course Transmission Protocol (SGCTP)
+ The objective of the Simple Geolocalization and Course Transmission
+ Protocol (SGCTP) is to transmit 2- or 3-dimensional position and motion data
+ in such a way as to use as little bandwidth as possible, thus making it fit
+ to aggregate data from roaming clients with limited network connectivity.
+ . 
+ This package contains SGCTP utilities (additional) documentation.
+
+Package: sgctp-daemons
+Section: utils
+Architecture: any
+Depends: sgctp-utils, ${misc:Depends}
+Description: Simple Geolocalization and Course Transmission Protocol (SGCTP)
+ The objective of the Simple Geolocalization and Course Transmission
+ Protocol (SGCTP) is to transmit 2- or 3-dimensional position and motion data
+ in such a way as to use as little bandwidth as possible, thus making it fit
+ to aggregate data from roaming clients with limited network connectivity.
+ . 
+ This package contains SGCTP (utilities wrapping) daemon scripts.
