@@ -428,7 +428,7 @@ int CSgctpUtil::exec()
 
         // Start feed
         __oData.reset();
-        __oData.setID( "###START" );
+        __oData.setID( "#START" );
         __iReturn = oTransmit_in.serialize( sdInput, __oData );
         if( __iReturn <= 0 )
         {

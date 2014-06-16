@@ -1471,7 +1471,7 @@ void CSgctpHub::clientInput( int _iSocket,
 
       // ... handle filter directives
       string __sID = __oData.getID();
-      if( __sID == "###START" )
+      if( __sID == "#START" )
       {
         __iReturn = clientStart( _poSgctpHubClient );
         if( __iReturn )
