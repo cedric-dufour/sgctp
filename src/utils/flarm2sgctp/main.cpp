@@ -170,6 +170,8 @@ void CSgctpUtil::displayHelp()
   displaySynopsisHeader();
   cout << "  Dump the SGCTP data received from the given FLARM file or serial port" << endl;
   cout << "  (default:'-', standard input)." << endl;
+  cout << endl << "WARNING:" << endl;
+  cout << "  Direct connection to FLARM serial port is untested! Please use with caution." << endl;
   displayOptionsHeader();
   cout << "  -o, --output <path>" << endl;
   cout << "    Output file (default:'-', standard output)" << endl;
